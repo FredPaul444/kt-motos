@@ -39,26 +39,26 @@ export default function DashboardPage() {
     if(error) alert(error.message); else { alert("Cliente registrado ✅"); setFormCliente({cedula:"", nombre:"", telefono:"", direccion:"", clave:""}); cargarClientes() }
   }
 
-  // REG = SUMAR PUNTOS
-  const registrarPuntos = async (cliente:any) => {
+  // + SUMAR
+  const sumarPuntos = async (cliente:any) => {
     const cantidad = Math.abs(Number(puntosInput[cliente.id] || 0))
-    if(cantidad === 0) return alert("Pon cuantos puntos le registras")
+    if(cantidad === 0) return alert("Pon cuantos puntos")
     const nuevos = (cliente.puntos || 0) + cantidad
     await supabase.from("clientes").update({puntos: nuevos}).eq("id", cliente.id)
     setPuntosInput({...puntosInput, [cliente.id]:""}); cargarClientes()
   }
   
-  // RESTAR PUNTOS
+  // - RESTAR
   const restarPuntos = async (cliente:any) => {
     const cantidad = Math.abs(Number(puntosInput[cliente.id] || 0))
-    if(cantidad === 0) return alert("Pon cuantos puntos quieres restar")
+    if(cantidad === 0) return alert("Pon cuantos puntos")
     let nuevos = (cliente.puntos || 0) - cantidad
     if(nuevos < 0) nuevos = 0
     await supabase.from("clientes").update({puntos: nuevos}).eq("id", cliente.id)
     setPuntosInput({...puntosInput, [cliente.id]:""}); cargarClientes()
   }
 
-  // BORRAR TODO A 0
+  // BORRAR A 0
   const borrarPuntos = async (cliente:any) => {
     if(!confirm(`¿Poner en 0 los puntos de ${cliente.nombre}?`)) return
     await supabase.from("clientes").update({puntos: 0}).eq("id", cliente.id)
@@ -79,7 +79,6 @@ export default function DashboardPage() {
 
   if(!user) return <div className="p-10 bg-black text-white">Cargando...</div>
 
-  // VISTA CLIENTE
   if(user.rol === "cliente") {
     const clienteActual = clientes.find(c=> c.cedula === user.cedula)
     return (
@@ -91,31 +90,27 @@ export default function DashboardPage() {
             <div className="mt-4 bg-black rounded-2xl p-5 border border-orange-500/30">
               <p className="text-zinc-500 text-xs font-bold tracking-widest">TUS PUNTOS KT</p>
               <p className="text-6xl font-black text-orange-500 mt-1">{clienteActual?.puntos ?? user.puntos ?? 0}</p>
-              <p className="text-xs text-zinc-600 mt-2">Acumula puntos en cada visita</p>
             </div>
             <button onClick={()=>{sessionStorage.clear(); localStorage.clear(); window.location.href="/"}} className="mt-6 bg-red-600 w-full py-3 rounded-xl font-black">Salir</button>
           </div>
-          <h3 className="font-black text-xl mb-3">Mis trabajos ({misHojas.length})</h3>
           {misHojas.map(h=><div key={h.id} className="bg-zinc-900 p-4 rounded-xl border border-zinc-800 mb-2"><p className="font-bold">{h.modelo_moto} - {h.placa} <span className="text-xs bg-orange-500 text-black px-2 py-1 rounded ml-2">{h.estado}</span></p></div>)}
         </div>
       </div>
     )
   }
 
-  // VISTA ADMIN
   return (
     <div className="min-h-screen bg-black text-white flex">
       <div className="w-64 bg-zinc-900 border-r border-zinc-800 p-4 flex flex-col">
         <h1 className="font-black text-orange-500 text-xl">KT MOTOS</h1>
-        <p className="text-xs text-zinc-500 mb-6">{user.nombre}</p>
-        <button onClick={()=>setModulo("hojas")} className={`w-full text-left px-4 py-3 rounded-xl font-bold mb-2 mt-4 ${modulo==="hojas"?"bg-orange-500 text-black":"bg-zinc-800 text-zinc-400"}`}>📋 Hojas</button>
-        <button onClick={()=>setModulo("clientes")} className={`w-full text-left px-4 py-3 rounded-xl font-bold mb-2 ${modulo==="clientes"?"bg-orange-500 text-black":"bg-zinc-800 text-zinc-400"}`}>👥 Clientes + Puntos</button>
+        <button onClick={()=>setModulo("hojas")} className={`w-full text-left px-4 py-3 rounded-xl font-bold mb-2 mt-4 ${modulo==="hojas"?"bg-orange-500 text-black":"bg-zinc-800"}`}>📋 Hojas</button>
+        <button onClick={()=>setModulo("clientes")} className={`w-full text-left px-4 py-3 rounded-xl font-bold mb-2 ${modulo==="clientes"?"bg-orange-500 text-black":"bg-zinc-800"}`}>👥 Clientes + Puntos</button>
         <button onClick={()=>{sessionStorage.clear(); localStorage.clear(); window.location.href="/"}} className="mt-auto bg-red-600 py-3 rounded-xl font-black">Salir</button>
       </div>
       <div className="flex-1 p-8 overflow-y-auto">
         {modulo==="clientes" && (
           <div>
-            <h2 className="text-3xl font-black mb-6">Clientes - Registro de Puntos</h2>
+            <h2 className="text-3xl font-black mb-6">Clientes - Puntos</h2>
             <form onSubmit={crearCliente} className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 mb-6 grid grid-cols-5 gap-3">
               <input value={formCliente.cedula} onChange={e=>setFormCliente({...formCliente,cedula:e.target.value})} placeholder="Cédula" className="p-3 rounded bg-zinc-800 border border-zinc-700" required />
               <input value={formCliente.nombre} onChange={e=>setFormCliente({...formCliente,nombre:e.target.value})} placeholder="Nombre" className="p-3 rounded bg-zinc-800 border border-zinc-700" required />
@@ -128,7 +123,7 @@ export default function DashboardPage() {
             <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-zinc-800 text-zinc-400">
-                  <tr><th className="p-3 text-left">Cliente</th><th className="p-3 text-center">Puntos</th><th className="p-3 text-center">Control Puntos</th></tr>
+                  <tr><th className="p-3 text-left">Cliente</th><th className="p-3 text-center">Puntos</th><th className="p-3 text-center">Control</th></tr>
                 </thead>
                 <tbody>{clientes.map(c=>(
                   <tr key={c.id} className="border-t border-zinc-800">
@@ -137,9 +132,9 @@ export default function DashboardPage() {
                     <td className="p-3">
                       <div className="flex gap-2 justify-center items-center">
                         <input type="number" value={puntosInput[c.id] || ""} onChange={e=>setPuntosInput({...puntosInput, [c.id]: e.target.value})} placeholder="10" className="w-20 p-2 rounded bg-zinc-800 border border-zinc-700 text-center font-bold" />
-                        <button onClick={()=>registrarPuntos(c)} className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg font-black text-xs">REG</button>
-                        <button onClick={()=>restarPuntos(c)} className="bg-yellow-500 hover:bg-yellow-400 px-3 py-2 rounded-lg font-black text-xs text-black">- RESTAR</button>
-                        <button onClick={()=>borrarPuntos(c)} className="bg-red-600 hover:bg-red-500 px-3 py-2 rounded-lg font-bold text-xs">BORRAR</button>
+                        <button onClick={()=>sumarPuntos(c)} className="bg-green-600 hover:bg-green-500 w-10 h-10 rounded-xl font-black text-xl flex items-center justify-center">+</button>
+                        <button onClick={()=>restarPuntos(c)} className="bg-yellow-500 hover:bg-yellow-400 w-10 h-10 rounded-xl font-black text-xl text-black flex items-center justify-center">-</button>
+                        <button onClick={()=>borrarPuntos(c)} className="bg-red-600 hover:bg-red-500 px-3 py-2 rounded-xl font-bold text-xs">BORRAR</button>
                       </div>
                     </td>
                   </tr>
@@ -150,29 +145,17 @@ export default function DashboardPage() {
         )}
         {modulo==="hojas" && (
           <div>
-            <h2 className="text-3xl font-black mb-6">Nueva Hoja de Trabajo</h2>
+            <h2 className="text-3xl font-black mb-6">Nueva Hoja</h2>
             <form onSubmit={crearHoja} className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 mb-8 grid grid-cols-3 gap-3 relative">
               <div className="col-span-3 relative">
-                <input value={formHoja.nombre_cliente} onChange={e=>buscarClientePorNombre(e.target.value)} placeholder="Escribe nombre del cliente..." className="w-full p-3 rounded bg-zinc-800 border border-orange-500/50" required />
-                {sugerencias.length>0 && <div className="absolute z-10 w-full bg-zinc-800 border border-zinc-700 rounded-xl mt-1 shadow-2xl">{sugerencias.map(s=><button type="button" key={s.id} onClick={()=>{setFormHoja({...formHoja, cedula_cliente:s.cedula, nombre_cliente:s.nombre, telefono:s.telefono}); setSugerencias([])}} className="w-full text-left p-3 hover:bg-orange-500 hover:text-black text-sm border-b border-zinc-700"><b>{s.nombre}</b> - {s.puntos || 0} pts - {s.cedula}</button>)}</div>}
+                <input value={formHoja.nombre_cliente} onChange={e=>buscarClientePorNombre(e.target.value)} placeholder="Escribe nombre cliente" className="w-full p-3 rounded bg-zinc-800 border border-orange-500/50" required />
+                {sugerencias.length>0 && <div className="absolute z-10 w-full bg-zinc-800 border border-zinc-700 rounded-xl mt-1">{sugerencias.map(s=><button type="button" key={s.id} onClick={()=>{setFormHoja({...formHoja, cedula_cliente:s.cedula, nombre_cliente:s.nombre, telefono:s.telefono}); setSugerencias([])}} className="w-full text-left p-3 hover:bg-orange-500 hover:text-black text-sm"><b>{s.nombre}</b> - {s.puntos} pts</button>)}</div>}
               </div>
               <input value={formHoja.cedula_cliente} onChange={e=>setFormHoja({...formHoja,cedula_cliente:e.target.value})} placeholder="Cédula" className="p-3 rounded bg-zinc-800 border border-zinc-700" />
               <input value={formHoja.telefono} onChange={e=>setFormHoja({...formHoja,telefono:e.target.value})} placeholder="Tel" className="p-3 rounded bg-zinc-800 border border-zinc-700" />
               <input value={formHoja.modelo_moto} onChange={e=>setFormHoja({...formHoja,modelo_moto:e.target.value})} placeholder="Modelo Moto" className="p-3 rounded bg-zinc-800 border border-zinc-700" required />
-              <input value={formHoja.placa} onChange={e=>setFormHoja({...formHoja,placa:e.target.value})} placeholder="Placa" className="p-3 rounded bg-zinc-800 border border-zinc-700" />
-              <input value={formHoja.kilometraje} onChange={e=>setFormHoja({...formHoja,kilometraje:e.target.value})} placeholder="Km" className="p-3 rounded bg-zinc-800 border border-zinc-700" />
-              <textarea value={formHoja.problema} onChange={e=>setFormHoja({...formHoja,problema:e.target.value})} placeholder="Problema reportado" className="col-span-3 p-3 rounded bg-zinc-800 border border-zinc-700" rows={2}></textarea>
-              <textarea value={formHoja.trabajo_realizar} onChange={e=>setFormHoja({...formHoja,trabajo_realizar:e.target.value})} placeholder="Trabajo a realizar" className="col-span-3 p-3 rounded bg-zinc-800 border border-zinc-700" rows={2}></textarea>
-              <input value={formHoja.repuestos} onChange={e=>setFormHoja({...formHoja,repuestos:e.target.value})} placeholder="Repuestos" className="col-span-3 p-3 rounded bg-zinc-800 border border-zinc-700" />
-              <input type="number" value={formHoja.mano_obra} onChange={e=>setFormHoja({...formHoja,mano_obra:e.target.value})} placeholder="Mano de obra $" className="p-3 rounded bg-zinc-800 border border-zinc-700" />
-              <input type="number" value={formHoja.costo_repuestos} onChange={e=>setFormHoja({...formHoja,costo_repuestos:e.target.value})} placeholder="Costo Repuestos $" className="p-3 rounded bg-zinc-800 border border-zinc-700" />
-              <select value={formHoja.estado} onChange={e=>setFormHoja({...formHoja,estado:e.target.value})} className="p-3 rounded bg-zinc-800 border border-zinc-700"><option value="pendiente">Pendiente</option><option value="en_proceso">En Proceso</option><option value="terminado">Terminado</option><option value="entregado">Entregado</option></select>
               <button className="col-span-3 bg-orange-500 text-black font-black py-3 rounded-xl">+ CREAR HOJA</button>
             </form>
-            <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-4">
-              <h3 className="font-bold mb-3">Últimas hojas ({hojas.length})</h3>
-              {hojas.slice(0,10).map(h=><div key={h.id} className="flex justify-between py-2 border-b border-zinc-800 text-sm"><span>{h.nombre_cliente} - {h.modelo_moto}</span><span className="text-orange-500">{h.estado}</span></div>)}
-            </div>
           </div>
         )}
       </div>
