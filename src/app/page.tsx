@@ -11,8 +11,15 @@ export default function Login(){
     if(error ||!data || data.length===0){ alert("Cedula o clave mala"); return }
     const user = data[0]
     localStorage.setItem("user", JSON.stringify(user))
-    if(user.rol==="admin") window.location.href="/admin"
-    else window.location.href="/dashboard"
+
+    // 3 NIVELES DE ACCESO
+    if(user.rol==="super_usuario"){
+      window.location.href="/super-admin"
+    } else if(user.rol==="usuario"){
+      window.location.href="/usuario"
+    } else {
+      window.location.href="/cliente"
+    }
   }
 
   return (
